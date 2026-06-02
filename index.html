@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>카드 무이자할부 정책 조회</title>
+    <meta
+      name="description"
+      content="카드사별 최신 무이자할부 기간과 조건을 조회합니다."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Card installment monitor</p>
+          <h1>카드사별 무이자할부 정책</h1>
+        </div>
+        <div class="timestamp">
+          <span>마지막 조회</span>
+          <strong id="updatedAt">조회 중</strong>
+        </div>
+      </section>
+
+      <section class="summary">
+        <div class="metric">
+          <span>카드사</span>
+          <strong id="totalCount">-</strong>
+        </div>
+        <div class="metric">
+          <span>자동 수집</span>
+          <strong id="collectedCount">-</strong>
+        </div>
+        <div class="metric">
+          <span>최대 무이자</span>
+          <strong id="bestMonth">-</strong>
+        </div>
+        <label class="search">
+          <span>검색</span>
+          <input id="searchInput" placeholder="카드사, 개월, 업종" />
+        </label>
+      </section>
+
+      <div class="notice" id="notice">정책을 조회하는 중입니다.</div>
+      <section class="grid" id="policyGrid" aria-live="polite"></section>
+    </main>
+
+    <script src="/main.js" type="module"></script>
+  </body>
+</html>

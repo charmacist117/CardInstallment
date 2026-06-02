@@ -1,0 +1,9 @@
+{
+  "name": "card-installment-policy-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node -e \"import('./lib/scraper.js').then(async m => console.log((await m.collectPolicies()).totalCount))\""
+  }
+}
