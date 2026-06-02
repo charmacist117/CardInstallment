@@ -5,7 +5,7 @@ const STATUS_LABELS = {
 };
 
 let policies = [];
-const selectedIndustries = {};
+let selectedIndustryId = "all";
 
 function formatTime(value) {
   if (!value) return "";
@@ -33,35 +33,40 @@ function escapeHtml(value) {
 
 function getSelectedIndustry(policy) {
   const industryPolicies = policy.industryPolicies || [];
-  const selectedIndustryId =
-    selectedIndustries[policy.id] || industryPolicies[0]?.id || "";
-
   return (
     industryPolicies.find((item) => item.id === selectedIndustryId) ||
+    industryPolicies.find((item) => item.id === "all") ||
     industryPolicies[0] ||
     null
   );
 }
 
-function renderIndustrySelector(policy, selectedIndustry) {
-  const industryPolicies = policy.industryPolicies || [];
-  if (!industryPolicies.length) return "";
+function getComparableMonths(policy) {
+  const selectedIndustry = getSelectedIndustry(policy);
+  return selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
+}
 
-  return `
-    <label class="industrySelect">
-      <span>업종 선택</span>
-      <select data-policy-id="${escapeHtml(policy.id)}">
-        ${industryPolicies
-          .map(
-            (item) =>
-              `<option value="${escapeHtml(item.id)}" ${
-                item.id === selectedIndustry?.id ? "selected" : ""
-              }>${escapeHtml(item.label)}</option>`
-          )
-          .join("")}
-      </select>
-    </label>
-  `;
+function populateIndustryFilter() {
+  const select = document.querySelector("#industryFilter");
+  const industryMap = new Map();
+
+  for (const policy of policies) {
+    for (const industry of policy.industryPolicies || []) {
+      if (!industryMap.has(industry.id)) {
+        industryMap.set(industry.id, industry.label);
+      }
+    }
+  }
+
+  select.innerHTML = [...industryMap.entries()]
+    .map(
+      ([id, label]) =>
+        `<option value="${escapeHtml(id)}" ${
+          id === selectedIndustryId ? "selected" : ""
+        }>${escapeHtml(label)}</option>`
+    )
+    .join("");
+  select.disabled = industryMap.size === 0;
 }
 
 function render() {
@@ -91,8 +96,7 @@ function render() {
     })
     .sort(
       (a, b) =>
-        monthScore(b.noInterestMonths || []) -
-        monthScore(a.noInterestMonths || [])
+        monthScore(getComparableMonths(b)) - monthScore(getComparableMonths(a))
     );
 
   grid.innerHTML = filtered
@@ -104,7 +108,6 @@ function render() {
         selectedIndustry?.partialMonths || policy.partialMonths || [];
       const minimumAmount =
         selectedIndustry?.minimumAmount || policy.minimumAmount || "";
-      const industrySelector = renderIndustrySelector(policy, selectedIndustry);
       const industryNotes = (selectedIndustry?.notes || [])
         .map((note) => `<li>${escapeHtml(note)}</li>`)
         .join("");
@@ -135,8 +138,12 @@ function render() {
             <span class="badge ${escapeHtml(policy.status)}">${escapeHtml(STATUS_LABELS[policy.status] || policy.status)}</span>
           </div>
 
+          <div class="selectedIndustry">
+            <span>비교 업종</span>
+            <strong>${escapeHtml(selectedIndustry?.label || "전체/일반")}</strong>
+          </div>
+
           <div class="policyRows">
-            ${industrySelector}
             <div>
               <span>무이자할부</span>
               <strong>${escapeHtml(noInterestMonths.length ? noInterestMonths.join(", ") : "원문 확인")}</strong>
@@ -159,13 +166,6 @@ function render() {
       `;
     })
     .join("");
-
-  grid.querySelectorAll(".industrySelect select").forEach((select) => {
-    select.addEventListener("change", (event) => {
-      selectedIndustries[event.target.dataset.policyId] = event.target.value;
-      render();
-    });
-  });
 }
 
 async function loadPolicies() {
@@ -176,6 +176,7 @@ async function loadPolicies() {
     const payload = await response.json();
     policies = payload.policies || [];
 
+    populateIndustryFilter();
     document.querySelector("#updatedAt").textContent =
       formatTime(payload.generatedAt) || "조회 완료";
     document.querySelector("#totalCount").textContent = policies.length || "-";
@@ -197,4 +198,8 @@ async function loadPolicies() {
 }
 
 document.querySelector("#searchInput").addEventListener("input", render);
+document.querySelector("#industryFilter").addEventListener("change", (event) => {
+  selectedIndustryId = event.target.value;
+  render();
+});
 loadPolicies();
