@@ -5,6 +5,7 @@ const STATUS_LABELS = {
 };
 
 let policies = [];
+const selectedIndustries = {};
 
 function formatTime(value) {
   if (!value) return "";
@@ -30,19 +31,59 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function getSelectedIndustry(policy) {
+  const industryPolicies = policy.industryPolicies || [];
+  const selectedIndustryId =
+    selectedIndustries[policy.id] || industryPolicies[0]?.id || "";
+
+  return (
+    industryPolicies.find((item) => item.id === selectedIndustryId) ||
+    industryPolicies[0] ||
+    null
+  );
+}
+
+function renderIndustrySelector(policy, selectedIndustry) {
+  const industryPolicies = policy.industryPolicies || [];
+  if (!industryPolicies.length) return "";
+
+  return `
+    <label class="industrySelect">
+      <span>업종 선택</span>
+      <select data-policy-id="${escapeHtml(policy.id)}">
+        ${industryPolicies
+          .map(
+            (item) =>
+              `<option value="${escapeHtml(item.id)}" ${
+                item.id === selectedIndustry?.id ? "selected" : ""
+              }>${escapeHtml(item.label)}</option>`
+          )
+          .join("")}
+      </select>
+    </label>
+  `;
+}
+
 function render() {
   const query = document.querySelector("#searchInput").value.trim().toLowerCase();
   const grid = document.querySelector("#policyGrid");
   const filtered = policies
     .filter((policy) => {
       if (!query) return true;
+      const industries = (policy.industryPolicies || []).flatMap((item) => [
+        item.label,
+        ...(item.noInterestMonths || []),
+        ...(item.partialMonths || []),
+        ...(item.notes || [])
+      ]);
       const haystack = [
         policy.issuer,
         policy.period,
         policy.minimumAmount,
         ...(policy.noInterestMonths || []),
         ...(policy.partialMonths || []),
-        ...(policy.notes || [])
+        ...(policy.notes || []),
+        ...industries
       ]
         .join(" ")
         .toLowerCase();
@@ -56,9 +97,29 @@ function render() {
 
   grid.innerHTML = filtered
     .map((policy) => {
+      const selectedIndustry = getSelectedIndustry(policy);
+      const noInterestMonths =
+        selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
+      const partialMonths =
+        selectedIndustry?.partialMonths || policy.partialMonths || [];
+      const minimumAmount =
+        selectedIndustry?.minimumAmount || policy.minimumAmount || "";
+      const industrySelector = renderIndustrySelector(policy, selectedIndustry);
+      const industryNotes = (selectedIndustry?.notes || [])
+        .map((note) => `<li>${escapeHtml(note)}</li>`)
+        .join("");
       const notes = (policy.notes || [])
         .map((note) => `<li>${escapeHtml(note)}</li>`)
         .join("");
+      const detectedEvents = (policy.detectedEvents || [])
+        .map(
+          (event) =>
+            `<li><strong>${escapeHtml(event.title)}</strong><span>${escapeHtml(event.period)}</span></li>`
+        )
+        .join("");
+      const eventList = detectedEvents
+        ? `<div class="events"><span>공식 페이지 감지</span><ul>${detectedEvents}</ul></div>`
+        : "";
       const source = policy.sourceUrl
         ? `<a class="sourceLink" href="${escapeHtml(policy.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(policy.sourceLabel || "원문 보기")}</a>`
         : "";
@@ -75,26 +136,36 @@ function render() {
           </div>
 
           <div class="policyRows">
+            ${industrySelector}
             <div>
               <span>무이자할부</span>
-              <strong>${escapeHtml(policy.noInterestMonths?.join(", ") || "원문 확인")}</strong>
+              <strong>${escapeHtml(noInterestMonths.length ? noInterestMonths.join(", ") : "원문 확인")}</strong>
             </div>
             <div>
               <span>부분무이자</span>
-              <strong>${escapeHtml(policy.partialMonths?.length ? policy.partialMonths.join(", ") : "없음 또는 미확인")}</strong>
+              <strong>${escapeHtml(partialMonths.length ? partialMonths.join(", ") : "없음 또는 미확인")}</strong>
             </div>
             <div>
               <span>결제금액</span>
-              <strong>${escapeHtml(policy.minimumAmount || "가맹점별 상이")}</strong>
+              <strong>${escapeHtml(minimumAmount || "가맹점별 상이")}</strong>
             </div>
           </div>
 
+          ${industryNotes ? `<ul class="notes industryNotes">${industryNotes}</ul>` : ""}
           <ul class="notes">${notes}</ul>
+          ${eventList}
           ${source}
         </article>
       `;
     })
     .join("");
+
+  grid.querySelectorAll(".industrySelect select").forEach((select) => {
+    select.addEventListener("change", (event) => {
+      selectedIndustries[event.target.dataset.policyId] = event.target.value;
+      render();
+    });
+  });
 }
 
 async function loadPolicies() {
