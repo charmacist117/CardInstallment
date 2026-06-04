@@ -38,7 +38,7 @@ function parsePeriodDate(year, month, day) {
 }
 
 function parsePeriodRange(period) {
-  if (!period) return null;
+  if (!period || period === "검색결과 없음") return null;
 
   const normalized = period.replace(/\s+/g, " ");
   const matches = [
@@ -65,6 +65,14 @@ function parsePeriodRange(period) {
 }
 
 function getPeriodStatus(period) {
+  if (period === "검색결과 없음") {
+    return {
+      label: "확인되지 않음",
+      className: "invalid",
+      title: "공식 페이지에서 관련 할부 정책 게시글을 찾지 못해 적용 기간도 확인되지 않았습니다."
+    };
+  }
+
   const range = parsePeriodRange(period);
   if (!range) {
     return {
