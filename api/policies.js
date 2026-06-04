@@ -17,6 +17,21 @@ function secondsUntilNextKstMidnight(now = new Date()) {
   return Math.max(60, Math.floor((nextKstMidnightUtcMs - now.getTime()) / 1000));
 }
 
+function currentKstMidnightIso(now = new Date()) {
+  const kstNow = new Date(now.getTime() + KST_OFFSET_MS);
+  const kstMidnightUtcMs =
+    Date.UTC(
+      kstNow.getUTCFullYear(),
+      kstNow.getUTCMonth(),
+      kstNow.getUTCDate(),
+      0,
+      0,
+      0
+    ) - KST_OFFSET_MS;
+
+  return new Date(kstMidnightUtcMs).toISOString();
+}
+
 export default async function handler(request, response) {
   try {
     const payload = await collectPolicies();
@@ -30,7 +45,7 @@ export default async function handler(request, response) {
     response.status(200).json(payload);
   } catch (error) {
     response.status(500).json({
-      generatedAt: new Date().toISOString(),
+      generatedAt: currentKstMidnightIso(),
       error: error.message,
       policies: []
     });
