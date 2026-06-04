@@ -46,6 +46,28 @@ function getComparableMonths(policy) {
   return selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
 }
 
+function isConfirmedNone(industry) {
+  return industry?.minimumAmount === "없음";
+}
+
+function formatNoInterestMonths(industry, policy) {
+  const months = industry?.noInterestMonths || policy.noInterestMonths || [];
+  if (months.length) return months.join(", ");
+  return isConfirmedNone(industry) ? "검색결과 없음" : "원문 확인";
+}
+
+function formatPartialMonths(industry, policy) {
+  const months = industry?.partialMonths || policy.partialMonths || [];
+  if (months.length) return months.join(", ");
+  return isConfirmedNone(industry) ? "검색결과 없음" : "없음 또는 미확인";
+}
+
+function formatMinimumAmount(industry, policy) {
+  if (isConfirmedNone(industry)) return "검색결과 없음";
+  if (industry?.minimumAmount) return industry.minimumAmount;
+  return policy.minimumAmount || "가맹점별 상이";
+}
+
 function populateIndustryFilter() {
   const select = document.querySelector("#industryFilter");
   const industryMap = new Map();
@@ -102,12 +124,9 @@ function render() {
   grid.innerHTML = filtered
     .map((policy) => {
       const selectedIndustry = getSelectedIndustry(policy);
-      const noInterestMonths =
-        selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
-      const partialMonths =
-        selectedIndustry?.partialMonths || policy.partialMonths || [];
-      const minimumAmount =
-        selectedIndustry?.minimumAmount || policy.minimumAmount || "";
+      const noInterestText = formatNoInterestMonths(selectedIndustry, policy);
+      const partialText = formatPartialMonths(selectedIndustry, policy);
+      const minimumAmount = formatMinimumAmount(selectedIndustry, policy);
       const industryNotes = (selectedIndustry?.notes || [])
         .map((note) => `<li>${escapeHtml(note)}</li>`)
         .join("");
@@ -146,15 +165,15 @@ function render() {
           <div class="policyRows">
             <div>
               <span>무이자할부</span>
-              <strong>${escapeHtml(noInterestMonths.length ? noInterestMonths.join(", ") : "원문 확인")}</strong>
+              <strong>${escapeHtml(noInterestText)}</strong>
             </div>
             <div>
               <span>부분무이자</span>
-              <strong>${escapeHtml(partialMonths.length ? partialMonths.join(", ") : "없음 또는 미확인")}</strong>
+              <strong>${escapeHtml(partialText)}</strong>
             </div>
             <div>
               <span>결제금액</span>
-              <strong>${escapeHtml(minimumAmount || "가맹점별 상이")}</strong>
+              <strong>${escapeHtml(minimumAmount)}</strong>
             </div>
           </div>
 
