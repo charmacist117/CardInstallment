@@ -296,7 +296,7 @@ async function loadPolicies() {
 
     populateIndustryFilter();
     document.querySelector("#updatedAt").textContent =
-      formatTime(payload.generatedAt) || "조회 완료";
+      formatTime(payload.generatedAt) || "갱신 완료";
     document.querySelector("#totalCount").textContent = policies.length || "-";
     document.querySelector("#collectedCount").textContent = payload.totalCount
       ? `${payload.collectedCount || 0}/${payload.totalCount}`

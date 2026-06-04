@@ -81,6 +81,15 @@ h1 {
   font-size: 14px;
 }
 
+.timestamp small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 .disclaimer {
   display: flex;
   gap: 8px;
@@ -202,10 +211,10 @@ h2 {
 }
 
 .periodLine {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 6px;
-  align-items: center;
+  align-items: start;
+  justify-items: start;
 }
 
 .periodBadge {
