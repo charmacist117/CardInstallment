@@ -292,16 +292,23 @@ h2 {
 
 .sourceLink {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
   margin-top: auto;
-  color: #1d5f7a;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 9px 12px;
+  border: 1px solid #b9d7e4;
+  border-radius: 8px;
+  background: #f4fbfe;
+  color: #155b73;
+  font-size: 13px;
+  font-weight: 800;
   text-decoration: none;
 }
 
 .sourceLink:hover {
-  text-decoration: underline;
+  border-color: #87bfd4;
+  background: #eaf7fc;
 }
 
 @media (max-width: 920px) {

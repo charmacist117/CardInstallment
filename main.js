@@ -150,7 +150,7 @@ function render() {
         ? `<div class="events"><span>공식 페이지 감지</span><ul>${detectedEvents}</ul></div>`
         : "";
       const source = policy.sourceUrl
-        ? `<a class="sourceLink" href="${escapeHtml(policy.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(policy.sourceLabel || "원문 보기")}</a>`
+        ? `<a class="sourceLink" href="${escapeHtml(policy.sourceUrl)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(policy.issuer)} 공식 홈페이지 조회">공식 홈페이지 조회</a>`
         : "";
 
       return `
