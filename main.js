@@ -70,7 +70,7 @@ function getPeriodStatus(period) {
     return {
       label: "확인되지 않음",
       className: "invalid",
-      title: "기간을 날짜 범위로 해석하지 못했습니다."
+      title: "행사 기간을 날짜 범위로 해석하지 못해 오늘 기준 적용 여부를 확인할 수 없습니다."
     };
   }
 
@@ -80,8 +80,8 @@ function getPeriodStatus(period) {
     label: isActive ? "확인됨" : "확인되지 않음",
     className: isActive ? "valid" : "invalid",
     title: isActive
-      ? "오늘 날짜 기준으로 해당 행사 기간 안에 있습니다."
-      : "오늘 날짜 기준으로 해당 행사 기간에 포함되지 않습니다."
+      ? "오늘 날짜 기준으로 표시된 행사 기간 안에 있어 현재 적용 기간으로 확인됩니다."
+      : "오늘 날짜 기준으로 표시된 행사 기간에 포함되지 않아 현재 적용 기간으로 확인되지 않습니다."
   };
 }
 
