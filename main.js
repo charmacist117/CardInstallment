@@ -303,7 +303,11 @@ async function loadPolicies() {
     populateIndustryFilter();
     document.querySelector("#updatedAt").textContent =
       formatTime(payload.generatedAt) || "갱신 완료";
-    document.querySelector("#totalCount").textContent = policies.length || "-";
+    document.querySelector("#totalCount").innerHTML = policies.length
+      ? policies
+          .map((policy) => `<span>${escapeHtml(policy.issuer)}</span>`)
+          .join("")
+      : "-";
     document.querySelector("#collectedCount").textContent = payload.totalCount
       ? `${payload.collectedCount || 0}/${payload.totalCount}`
       : "-";

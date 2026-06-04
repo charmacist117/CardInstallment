@@ -111,7 +111,7 @@ h1 {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(120px, 0.8fr)) minmax(180px, 1fr) minmax(220px, 1.2fr);
+  grid-template-columns: minmax(280px, 1.7fr) repeat(2, minmax(120px, 0.8fr)) minmax(180px, 1fr) minmax(220px, 1.2fr);
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -130,6 +130,29 @@ h1 {
   display: block;
   margin-top: 8px;
   font-size: 28px;
+}
+
+.issuerMetric strong {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0;
+  line-height: 1;
+}
+
+.issuerMetric strong > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 7px;
+  border: 1px solid #d7e4eb;
+  border-radius: 999px;
+  background: #f6fbfd;
+  color: #1b4052;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .search input {
