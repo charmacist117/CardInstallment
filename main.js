@@ -46,6 +46,13 @@ function getComparableMonths(policy) {
   return selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
 }
 
+function updateBestMonth() {
+  const bestMonth = monthScore(policies.flatMap(getComparableMonths));
+  document.querySelector("#bestMonth").textContent = bestMonth
+    ? `${bestMonth}개월`
+    : "-";
+}
+
 function isConfirmedNone(industry) {
   return industry?.minimumAmount === "없음";
 }
@@ -185,6 +192,8 @@ function render() {
       `;
     })
     .join("");
+
+  updateBestMonth();
 }
 
 async function loadPolicies() {
@@ -201,12 +210,6 @@ async function loadPolicies() {
     document.querySelector("#totalCount").textContent = policies.length || "-";
     document.querySelector("#collectedCount").textContent = payload.totalCount
       ? `${payload.collectedCount || 0}/${payload.totalCount}`
-      : "-";
-    const bestMonth = monthScore(
-      policies.flatMap((policy) => policy.noInterestMonths || [])
-    );
-    document.querySelector("#bestMonth").textContent = bestMonth
-      ? `${bestMonth}개월`
       : "-";
     notice.hidden = true;
     render();
