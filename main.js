@@ -85,6 +85,10 @@ function getPeriodStatus(period) {
   };
 }
 
+function getDisplayStatus(status) {
+  return status === "unavailable" ? "fallback" : status;
+}
+
 function monthScore(months) {
   return months.reduce((score, item) => {
     const numbers = item.match(/\d+/g)?.map(Number) || [];
@@ -201,7 +205,11 @@ function render() {
     .map((policy) => {
       const selectedIndustry = getSelectedIndustry(policy);
       const periodStatus = getPeriodStatus(policy.period);
-      const statusTitle = STATUS_HELP[policy.status] || "수집 상태를 확인할 수 없습니다.";
+      const displayStatus = getDisplayStatus(policy.status);
+      const statusTitle =
+        policy.status === "unavailable"
+          ? "공식 페이지 접속은 실패했지만 사전에 검증해 둔 보정값을 표시합니다."
+          : STATUS_HELP[displayStatus] || "수집 상태를 확인할 수 없습니다.";
       const noInterestText = formatNoInterestMonths(selectedIndustry, policy);
       const partialText = formatPartialMonths(selectedIndustry, policy);
       const minimumAmount = formatMinimumAmount(selectedIndustry, policy);
@@ -232,10 +240,10 @@ function render() {
               <h2>${escapeHtml(policy.issuer)}</h2>
               <p class="periodLine">
                 <span>${escapeHtml(policy.period)}</span>
-                <span class="periodBadge ${escapeHtml(periodStatus.className)}" title="${escapeHtml(periodStatus.title)}">${escapeHtml(periodStatus.label)}</span>
+                <span class="periodBadge ${escapeHtml(periodStatus.className)} tooltip" title="${escapeHtml(periodStatus.title)}" data-tooltip="${escapeHtml(periodStatus.title)}">${escapeHtml(periodStatus.label)}</span>
               </p>
             </div>
-            <span class="badge ${escapeHtml(policy.status)}" title="${escapeHtml(statusTitle)}">${escapeHtml(STATUS_LABELS[policy.status] || policy.status)}</span>
+            <span class="badge ${escapeHtml(displayStatus)} tooltip" title="${escapeHtml(statusTitle)}" data-tooltip="${escapeHtml(statusTitle)}">${escapeHtml(STATUS_LABELS[displayStatus] || displayStatus)}</span>
           </div>
 
           <div class="selectedIndustry">
