@@ -2,11 +2,7 @@
   "crons": [
     {
       "path": "/api/policies",
-      "schedule": "0 18 1 * *"
-    },
-    {
-      "path": "/api/policies",
-      "schedule": "0 18 15 * *"
+      "schedule": "0 15 * * *"
     }
   ]
 }
