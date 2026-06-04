@@ -11,7 +11,8 @@ const STATUS_HELP = {
 };
 
 let policies = [];
-let selectedIndustryId = "all";
+let selectedIndustryId = "pharmacy";
+const VISIBLE_INDUSTRY_IDS = new Set(["pharmacy"]);
 
 function formatTime(value) {
   if (!value) return "";
@@ -162,6 +163,7 @@ function populateIndustryFilter() {
 
   for (const policy of policies) {
     for (const industry of policy.industryPolicies || []) {
+      if (!VISIBLE_INDUSTRY_IDS.has(industry.id)) continue;
       if (!industryMap.has(industry.id)) {
         industryMap.set(industry.id, industry.label);
       }
@@ -176,6 +178,10 @@ function populateIndustryFilter() {
         }>${escapeHtml(label)}</option>`
     )
     .join("");
+  if (!industryMap.has(selectedIndustryId)) {
+    selectedIndustryId = [...industryMap.keys()][0] || "pharmacy";
+  }
+  select.value = selectedIndustryId;
   select.disabled = industryMap.size === 0;
 }
 
