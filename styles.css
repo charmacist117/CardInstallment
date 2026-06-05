@@ -427,6 +427,14 @@ h2 {
   background: #eaf7fc;
 }
 
+.credit {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
 @media (max-width: 920px) {
   .topbar {
     align-items: stretch;
