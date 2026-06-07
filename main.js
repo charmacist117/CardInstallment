@@ -12,7 +12,11 @@ const STATUS_HELP = {
 
 let policies = [];
 let selectedIndustryId = "pharmacy";
-const VISIBLE_INDUSTRY_IDS = new Set(["pharmacy"]);
+const VISIBLE_INDUSTRY_IDS = new Set([
+  "pharmacy",
+  "tax",
+  "tax_other"
+]);
 
 function formatTime(value) {
   if (!value) return "";
@@ -142,6 +146,7 @@ function isConfirmedNone(industry) {
 function formatNoInterestMonths(industry, policy) {
   const months = industry?.noInterestMonths || policy.noInterestMonths || [];
   if (months.length) return months.join(", ");
+  if (industry?.partialMonths?.length) return "검색결과 없음";
   return isConfirmedNone(industry) ? "검색결과 없음" : "원문 확인";
 }
 
@@ -242,8 +247,9 @@ function render() {
       const eventList = detectedEvents
         ? `<div class="events"><span>공식 페이지 감지</span><ul>${detectedEvents}</ul></div>`
         : "";
-      const source = policy.sourceUrl
-        ? `<a class="sourceLink" href="${escapeHtml(policy.sourceUrl)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(policy.issuer)} 공식 홈페이지 조회">공식 홈페이지 조회</a>`
+      const sourceUrl = selectedIndustry?.sourceUrl || policy.sourceUrl;
+      const source = sourceUrl
+        ? `<a class="sourceLink" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(policy.issuer)} 공식 홈페이지 조회">공식 홈페이지 조회</a>`
         : "";
 
       return `
