@@ -12,11 +12,15 @@ const STATUS_HELP = {
 
 let policies = [];
 let selectedIndustryId = "pharmacy";
-const VISIBLE_INDUSTRY_IDS = new Set([
+const VISIBLE_INDUSTRY_ORDER = [
   "pharmacy",
+  "pharma_wholesale",
+  "appliance",
+  "vehicle_purchase",
   "tax",
   "tax_other"
-]);
+];
+const VISIBLE_INDUSTRY_IDS = new Set(VISIBLE_INDUSTRY_ORDER);
 
 function formatTime(value) {
   if (!value) return "";
@@ -175,12 +179,13 @@ function populateIndustryFilter() {
     }
   }
 
-  select.innerHTML = [...industryMap.entries()]
+  select.innerHTML = VISIBLE_INDUSTRY_ORDER
+    .filter((id) => industryMap.has(id))
     .map(
-      ([id, label]) =>
+      (id) =>
         `<option value="${escapeHtml(id)}" ${
           id === selectedIndustryId ? "selected" : ""
-        }>${escapeHtml(label)}</option>`
+        }>${escapeHtml(industryMap.get(id))}</option>`
     )
     .join("");
   if (!industryMap.has(selectedIndustryId)) {
