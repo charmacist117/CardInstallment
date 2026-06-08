@@ -136,6 +136,46 @@ function getComparableMonths(policy) {
   return selectedIndustry?.noInterestMonths || policy.noInterestMonths || [];
 }
 
+function hasBottomNotes(policy, industry) {
+  return Boolean(
+    (industry?.notes || []).length ||
+      (policy.notes || []).length ||
+      (policy.detectedEvents || []).length
+  );
+}
+
+function compareSelectedIndustryPriority(a, b) {
+  const industryA = getSelectedIndustry(a);
+  const industryB = getSelectedIndustry(b);
+  const noInterestA = industryA?.noInterestMonths || [];
+  const noInterestB = industryB?.noInterestMonths || [];
+  const partialA = industryA?.partialMonths || [];
+  const partialB = industryB?.partialMonths || [];
+
+  const priorityA = [
+    noInterestA.length ? 1 : 0,
+    partialA.length ? 1 : 0,
+    hasBottomNotes(a, industryA) ? 1 : 0,
+    monthScore(noInterestA),
+    monthScore(partialA)
+  ];
+  const priorityB = [
+    noInterestB.length ? 1 : 0,
+    partialB.length ? 1 : 0,
+    hasBottomNotes(b, industryB) ? 1 : 0,
+    monthScore(noInterestB),
+    monthScore(partialB)
+  ];
+
+  for (let index = 0; index < priorityA.length; index += 1) {
+    if (priorityA[index] !== priorityB[index]) {
+      return priorityB[index] - priorityA[index];
+    }
+  }
+
+  return 0;
+}
+
 function updateBestMonth() {
   const bestMonth = monthScore(policies.flatMap(getComparableMonths));
   document.querySelector("#bestMonth").textContent = bestMonth
@@ -220,10 +260,7 @@ function render() {
         .toLowerCase();
       return haystack.includes(query);
     })
-    .sort(
-      (a, b) =>
-        monthScore(getComparableMonths(b)) - monthScore(getComparableMonths(a))
-    );
+    .sort(compareSelectedIndustryPriority);
 
   grid.innerHTML = filtered
     .map((policy) => {
