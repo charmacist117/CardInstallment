@@ -1,3 +1,8 @@
+import {
+  VISIBLE_INDUSTRY_IDS,
+  VISIBLE_INDUSTRY_ORDER
+} from "./lib/industryCatalog.js";
+
 const STATUS_LABELS = {
   collected: "수집됨",
   fallback: "보조값",
@@ -12,15 +17,6 @@ const STATUS_HELP = {
 
 let policies = [];
 let selectedIndustryId = "pharmacy";
-const VISIBLE_INDUSTRY_ORDER = [
-  "pharmacy",
-  "pharma_wholesale",
-  "appliance",
-  "vehicle_purchase",
-  "tax",
-  "tax_other"
-];
-const VISIBLE_INDUSTRY_IDS = new Set(VISIBLE_INDUSTRY_ORDER);
 
 function formatTime(value) {
   if (!value) return "";

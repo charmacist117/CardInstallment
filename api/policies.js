@@ -1,36 +1,8 @@
 import { collectPolicies } from "../lib/scraper.js";
-
-const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-
-function secondsUntilNextKstMidnight(now = new Date()) {
-  const kstNow = new Date(now.getTime() + KST_OFFSET_MS);
-  const nextKstMidnightUtcMs =
-    Date.UTC(
-      kstNow.getUTCFullYear(),
-      kstNow.getUTCMonth(),
-      kstNow.getUTCDate() + 1,
-      0,
-      0,
-      0
-    ) - KST_OFFSET_MS;
-
-  return Math.max(60, Math.floor((nextKstMidnightUtcMs - now.getTime()) / 1000));
-}
-
-function currentKstMidnightIso(now = new Date()) {
-  const kstNow = new Date(now.getTime() + KST_OFFSET_MS);
-  const kstMidnightUtcMs =
-    Date.UTC(
-      kstNow.getUTCFullYear(),
-      kstNow.getUTCMonth(),
-      kstNow.getUTCDate(),
-      0,
-      0,
-      0
-    ) - KST_OFFSET_MS;
-
-  return new Date(kstMidnightUtcMs).toISOString();
-}
+import {
+  currentKstMidnightIso,
+  secondsUntilNextKstMidnight
+} from "../lib/time.js";
 
 export default async function handler(request, response) {
   try {

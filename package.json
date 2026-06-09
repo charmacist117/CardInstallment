@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node -e \"import('./lib/scraper.js').then(async m => console.log((await m.collectPolicies()).totalCount))\""
+    "check": "node --check api/policies.js && node --check lib/scraper.js && node --check lib/industryPolicies.js && node --check lib/policyDefaults.js && node --check main.js",
+    "export:policies": "node scripts/exportPolicies.js"
   }
 }
