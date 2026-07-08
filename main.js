@@ -29,10 +29,7 @@ function formatTime(value) {
 
 function getRefreshMeta(payload) {
   const targetPeriod = payload.targetPeriod || "현재 월";
-  const confirmed = policies.filter((policy) => {
-    const periodStatus = getPeriodStatus(policy.period);
-    return periodStatus.className === "valid" && policy.status === "collected";
-  }).length;
+  const confirmed = policies.filter((policy) => policy.reflectedAt).length;
   const needsCheck = policies.filter((policy) => policy.period === "현재 월 공지 확인 필요").length;
 
   return `기준 ${targetPeriod} · 자동확정 ${confirmed}/${policies.length} · 확인필요 ${needsCheck}`;
@@ -356,7 +353,9 @@ async function loadPolicies() {
   const notice = document.querySelector("#notice");
 
   try {
-    const response = await fetch("/api/policies");
+    const response = await fetch(`/api/policies?ts=${Date.now()}`, {
+      cache: "no-store"
+    });
     const payload = await response.json();
     policies = payload.policies || [];
 
@@ -370,7 +369,7 @@ async function loadPolicies() {
           .join("")
       : "-";
     document.querySelector("#collectedCount").textContent = payload.totalCount
-      ? `${payload.collectedCount || 0}/${payload.totalCount}`
+      ? `${payload.reflectedCount || payload.collectedCount || 0}/${payload.totalCount}`
       : "-";
     notice.hidden = true;
     render();
