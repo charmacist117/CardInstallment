@@ -27,6 +27,17 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function getRefreshMeta(payload) {
+  const targetPeriod = payload.targetPeriod || "현재 월";
+  const confirmed = policies.filter((policy) => {
+    const periodStatus = getPeriodStatus(policy.period);
+    return periodStatus.className === "valid" && policy.status === "collected";
+  }).length;
+  const needsCheck = policies.filter((policy) => policy.period === "현재 월 공지 확인 필요").length;
+
+  return `기준 ${targetPeriod} · 자동확정 ${confirmed}/${policies.length} · 확인필요 ${needsCheck}`;
+}
+
 function getKstToday() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
@@ -346,7 +357,8 @@ async function loadPolicies() {
 
     populateIndustryFilter();
     document.querySelector("#updatedAt").textContent =
-      formatTime(payload.generatedAt) || "갱신 완료";
+      formatTime(payload.generatedAt) || "조회 완료";
+    document.querySelector("#refreshMeta").textContent = getRefreshMeta(payload);
     document.querySelector("#totalCount").innerHTML = policies.length
       ? policies
           .map((policy) => `<span>${escapeHtml(policy.issuer)}</span>`)

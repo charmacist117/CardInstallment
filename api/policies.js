@@ -1,23 +1,24 @@
 import { collectPolicies } from "../lib/scraper.js";
 import {
-  currentKstMidnightIso,
-  secondsUntilNextKstMidnight
+  currentKstMonthPeriod,
+  secondsUntilNextRefresh
 } from "../lib/time.js";
 
 export default async function handler(request, response) {
   try {
     const payload = await collectPolicies();
-    const maxAge = secondsUntilNextKstMidnight();
+    const maxAge = secondsUntilNextRefresh();
 
     response.setHeader(
       "Cache-Control",
-      `s-maxage=${maxAge}, stale-while-revalidate=3600`
+      `s-maxage=${maxAge}, stale-while-revalidate=600`
     );
-    response.setHeader("X-Refresh-Basis", "00:00 Asia/Seoul");
+    response.setHeader("X-Refresh-Basis", "Every 6 hours");
     response.status(200).json(payload);
   } catch (error) {
     response.status(500).json({
-      generatedAt: currentKstMidnightIso(),
+      generatedAt: new Date().toISOString(),
+      targetPeriod: currentKstMonthPeriod(),
       error: error.message,
       policies: []
     });
