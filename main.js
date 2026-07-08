@@ -38,6 +38,11 @@ function getRefreshMeta(payload) {
   return `기준 ${targetPeriod} · 자동확정 ${confirmed}/${policies.length} · 확인필요 ${needsCheck}`;
 }
 
+function formatReflectedAt(payload) {
+  if (payload.reflectedAt) return formatTime(payload.reflectedAt);
+  return "최신 자동반영 없음";
+}
+
 function getKstToday() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
@@ -357,7 +362,7 @@ async function loadPolicies() {
 
     populateIndustryFilter();
     document.querySelector("#updatedAt").textContent =
-      formatTime(payload.generatedAt) || "조회 완료";
+      formatReflectedAt(payload);
     document.querySelector("#refreshMeta").textContent = getRefreshMeta(payload);
     document.querySelector("#totalCount").innerHTML = policies.length
       ? policies

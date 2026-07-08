@@ -18,6 +18,7 @@ export default async function handler(request, response) {
   } catch (error) {
     response.status(500).json({
       generatedAt: new Date().toISOString(),
+      reflectedAt: "",
       targetPeriod: currentKstMonthPeriod(),
       error: error.message,
       policies: []
