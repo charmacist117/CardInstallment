@@ -30,9 +30,12 @@ function formatTime(value) {
 function getRefreshMeta(payload) {
   const targetPeriod = payload.targetPeriod || "현재 월";
   const confirmed = policies.filter((policy) => policy.reflectedAt).length;
-  const needsCheck = policies.filter((policy) => policy.period === "현재 월 공지 확인 필요").length;
+  const needsCheck = policies.filter(needsManualCheck).length;
+  const fallback = policies.filter(
+    (policy) => !policy.reflectedAt && getDisplayStatus(policy) === "fallback"
+  ).length;
 
-  return `기준 ${targetPeriod} · 자동확정 ${confirmed}/${policies.length} · 확인필요 ${needsCheck}`;
+  return `기준 ${targetPeriod} · 자동확정 ${confirmed}/${policies.length} · 보조값 ${fallback} · 확인필요 ${needsCheck}`;
 }
 
 function formatReflectedAt(payload) {
@@ -83,9 +86,17 @@ function parsePeriodRange(period) {
 }
 
 function getPeriodStatus(period) {
+  if (period === "현재 월 공지 확인 필요") {
+    return {
+      label: "기간 확인 필요",
+      className: "invalid",
+      title: "현재 월 공식 공지 기간을 자동확정하지 못했습니다."
+    };
+  }
+
   if (period === "검색결과 없음") {
     return {
-      label: "확인되지 않음",
+      label: "기간 없음",
       className: "invalid",
       title: "공식 페이지에서 관련 할부 정책 게시글을 찾지 못해 적용 기간도 확인되지 않았습니다."
     };
@@ -94,7 +105,7 @@ function getPeriodStatus(period) {
   const range = parsePeriodRange(period);
   if (!range) {
     return {
-      label: "확인되지 않음",
+      label: "기간 확인 필요",
       className: "invalid",
       title: "행사 기간을 날짜 범위로 해석하지 못해 오늘 기준 적용 여부를 확인할 수 없습니다."
     };
@@ -103,7 +114,7 @@ function getPeriodStatus(period) {
   const today = getKstToday();
   const isActive = today >= range.start && today <= range.end;
   return {
-    label: isActive ? "확인됨" : "확인되지 않음",
+    label: isActive ? "기간 유효" : "기간 불일치",
     className: isActive ? "valid" : "invalid",
     title: isActive
       ? "오늘 날짜 기준으로 표시된 행사 기간 안에 있어 현재 적용 기간으로 확인됩니다."
@@ -111,8 +122,27 @@ function getPeriodStatus(period) {
   };
 }
 
-function getDisplayStatus(status) {
-  return status === "unavailable" ? "fallback" : status;
+function needsManualCheck(policy) {
+  return (
+    policy.status === "unavailable" ||
+    policy.period === "현재 월 공지 확인 필요" ||
+    policy.period === "검색결과 없음"
+  );
+}
+
+function getDisplayStatus(policy) {
+  if (needsManualCheck(policy)) return "unavailable";
+  return policy.status || "fallback";
+}
+
+function getStatusTitle(policy, displayStatus) {
+  if (displayStatus === "unavailable") {
+    return policy.status === "unavailable"
+      ? "공식 페이지 접속 또는 해석에 실패해 확인이 필요합니다."
+      : "공식 페이지에서 현재 적용 정책을 자동확정하지 못해 확인이 필요합니다.";
+  }
+
+  return STATUS_HELP[displayStatus] || "수집 상태를 확인할 수 없습니다.";
 }
 
 function monthScore(months) {
@@ -275,11 +305,8 @@ function render() {
     .map((policy) => {
       const selectedIndustry = getSelectedIndustry(policy);
       const periodStatus = getPeriodStatus(policy.period);
-      const displayStatus = getDisplayStatus(policy.status);
-      const statusTitle =
-        policy.status === "unavailable"
-          ? "공식 페이지 접속은 실패했지만 사전에 검증해 둔 보정값을 표시합니다."
-          : STATUS_HELP[displayStatus] || "수집 상태를 확인할 수 없습니다.";
+      const displayStatus = getDisplayStatus(policy);
+      const statusTitle = getStatusTitle(policy, displayStatus);
       const noInterestText = formatNoInterestMonths(selectedIndustry, policy);
       const partialText = formatPartialMonths(selectedIndustry, policy);
       const minimumAmount = formatMinimumAmount(selectedIndustry, policy);
